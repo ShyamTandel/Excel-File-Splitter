@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Excel File Splitter</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #4F46E5;
+            --primary-dark: #3730A3;
+            --primary-light: #6366F1;
+            --secondary-color: #EC4899;
+            --success-color: #10B981;
+            --error-color: #EF4444;
+            --warning-color: #F59E0B;
+            --background: #F8FAFC;
+            --surface: #FFFFFF;
+            --text-primary: #1F2937;
+            --text-secondary: #6B7280;
+            --border-light: #E5E7EB;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Animated background elements */
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 40% 80%, rgba(120, 119, 198, 0.2) 0%, transparent 50%);
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            box-shadow: var(--shadow-xl);
+            overflow: hidden;
+            max-width: 600px;
+            width: 100%;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            position: relative;
+            z-index: 1;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="50" cy="50" r="1" fill="white" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+            opacity: 0.1;
+        }
+        
+        .header-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .header-icon {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 15px;
+            border-radius: 16px;
+            font-size: 1.2em;
+        }
+        
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1em;
+            font-weight: 400;
+            margin-top: 10px;
+        }
+        
+        .form-container {
+            padding: 40px;
+        }
+        
+        .info-box {
+            background: linear-gradient(135deg, #EBF4FF 0%, #E0E7FF 100%);
+            border: 1px solid #C7D2FE;
+            color: var(--text-primary);
+            padding: 20px;
+            border-radius: 16px;
+            margin-bottom: 30px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .info-box::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: var(--primary-color);
+        }
+        
+        .info-box strong {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        .form-group label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 12px;
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 1em;
+        }
+
+        .label-icon {
+            font-size: 1.2em;
+            color: var(--primary-color);
+        }
+        
+        .form-group input[type="file"],
+        .form-group input[type="text"] {
+            width: 100%;
+            padding: 16px 20px;
+            border: 2px solid var(--border-light);
+            border-radius: 12px;
+            font-size: 1em;
+            font-family: inherit;
+            transition: all 0.3s ease;
+            background: var(--surface);
+            color: var(--text-primary);
+        }
+
+        .form-group input[type="file"] {
+            cursor: pointer;
+            background: linear-gradient(135deg, #F9FAFB 0%, #F3F4F6 100%);
+        }
+        
+        .form-group input[type="file"]:focus,
+        .form-group input[type="text"]:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .form-group input::placeholder {
+            color: var(--text-secondary);
+        }
+        
+        .submit-btn {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
+            color: white;
+            border: none;
+            padding: 18px 30px;
+            border-radius: 12px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .submit-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .submit-btn:hover::before {
+            left: 100%;
+        }
+        
+        .submit-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(79, 70, 229, 0.3);
+        }
+        
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .submit-btn:disabled:hover {
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .result-section {
+            margin-top: 30px;
+            padding: 25px;
+            border-radius: 16px;
+            display: none;
+            animation: slideIn 0.5s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .result-success {
+            background: linear-gradient(135deg, #ECFDF5 0%, #D1FAE5 100%);
+            border: 1px solid #A7F3D0;
+            color: #065F46;
+        }
+        
+        .result-error {
+            background: linear-gradient(135deg, #FEF2F2 0%, #FECACA 100%);
+            border: 1px solid #FCA5A5;
+            color: #991B1B;
+        }
+
+        .result-section h3 {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+        
+        .file-list {
+            margin-top: 20px;
+        }
+
+        .file-list h4 {
+            margin-bottom: 15px;
+            font-size: 1.1em;
+            color: var(--text-primary);
+        }
+        
+        .file-item {
+            background: rgba(255, 255, 255, 0.8);
+            padding: 12px 16px;
+            margin: 8px 0;
+            border-radius: 10px;
+            border-left: 4px solid var(--primary-color);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .file-item:hover {
+            transform: translateX(5px);
+            box-shadow: var(--shadow-md);
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 30px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .spinner {
+            border: 4px solid #E5E7EB;
+            border-top: 4px solid var(--primary-color);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading p {
+            color: var(--text-secondary);
+            font-weight: 500;
+            font-size: 1.1em;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 640px) {
+            .container {
+                margin: 10px;
+                border-radius: 20px;
+            }
+
+            .header {
+                padding: 30px 20px;
+            }
+
+            .header h1 {
+                font-size: 2em;
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .form-container {
+                padding: 30px 20px;
+            }
+
+            .form-group input[type="file"],
+            .form-group input[type="text"] {
+                padding: 14px 16px;
+            }
+
+            .submit-btn {
+                padding: 16px 24px;
+            }
+        }
+
+        /* Custom file input styling */
+        .file-input-wrapper {
+            position: relative;
+            overflow: hidden;
+            border-radius: 12px;
+        }
+
+        .file-input-wrapper input[type="file"] {
+            position: absolute;
+            left: -9999px;
+        }
+
+        .file-input-label {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px 20px;
+            border: 2px dashed var(--border-light);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: linear-gradient(135deg, #F9FAFB 0%, #F3F4F6 100%);
+            color: var(--text-secondary);
+        }
+
+        .file-input-label:hover {
+            border-color: var(--primary-color);
+            background: linear-gradient(135deg, #EBF4FF 0%, #E0E7FF 100%);
+            color: var(--primary-color);
+        }
+
+        .file-input-label.has-file {
+            border-color: var(--success-color);
+            background: linear-gradient(135deg, #ECFDF5 0%, #D1FAE5 100%);
+            color: var(--success-color);
+        }
+
+        .upload-icon {
+            font-size: 1.5em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="header-content">
+                <h1>
+                    <div class="header-icon">
+                        <i class="fas fa-table"></i>
+                    </div>
+                    Excel Splitter
+                </h1>
+                <p>Transform your Excel files with intelligent column-based splitting</p>
+            </div>
+        </div>
+        
+        <div class="form-container">
+            <div class="info-box">
+                <strong><i class="fas fa-info-circle"></i> How it works:</strong>
+                Upload an Excel file and specify a column name. The tool will create separate Excel files for each unique value in that column and automatically download them as a ZIP file.
+            </div>
+            
+            <form id="excelForm" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label for="file">
+                        <i class="fas fa-file-excel label-icon"></i>
+                        Select Excel File
+                    </label>
+                    <div class="file-input-wrapper">
+                        <input type="file" id="file" name="file" accept=".xlsx,.xls" required>
+                        <label for="file" class="file-input-label" id="fileLabel">
+                            <i class="fas fa-cloud-upload-alt upload-icon"></i>
+                            <span>Choose your Excel file or drag & drop here</span>
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="column">
+                        <i class="fas fa-columns label-icon"></i>
+                        Column Name
+                    </label>
+                    <input type="text" id="column" name="column" placeholder="Enter the column name to split by" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="excel_name">
+                        <i class="fas fa-tag label-icon"></i>
+                        Output File Prefix
+                    </label>
+                    <input type="text" id="excel_name" name="excel_name" placeholder="Enter prefix for output files" required>
+                </div>
+                
+                <button type="submit" class="submit-btn" id="submitBtn">
+                    <i class="fas fa-magic"></i>
+                    Split Excel File
+                </button>
+            </form>
+            
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>Processing your file...</p>
+            </div>
+            
+            <div class="result-section" id="resultSection">
+                <div id="resultContent"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // File input enhancement
+        const fileInput = document.getElementById('file');
+        const fileLabel = document.getElementById('fileLabel');
+        
+        fileInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const validTypes = ['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'application/vnd.ms-excel'];
+                if (!validTypes.includes(file.type) && !file.name.toLowerCase().endsWith('.xlsx') && !file.name.toLowerCase().endsWith('.xls')) {
+                    alert('Please select a valid Excel file (.xlsx or .xls)');
+                    e.target.value = '';
+                    fileLabel.innerHTML = '<i class="fas fa-cloud-upload-alt upload-icon"></i><span>Choose your Excel file or drag & drop here</span>';
+                    fileLabel.classList.remove('has-file');
+                } else {
+                    fileLabel.innerHTML = `<i class="fas fa-file-excel upload-icon"></i><span>${file.name}</span>`;
+                    fileLabel.classList.add('has-file');
+                }
+            }
+        });
+
+        // Form submission
+        document.getElementById('excelForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData();
+            const fileInput = document.getElementById('file');
+            const columnInput = document.getElementById('column');
+            const excelNameInput = document.getElementById('excel_name');
+            
+            // Validate inputs
+            if (!fileInput.files[0]) {
+                showNotification('Please select a file', 'error');
+                return;
+            }
+            
+            if (!columnInput.value.trim()) {
+                showNotification('Please enter a column name', 'error');
+                return;
+            }
+            
+            if (!excelNameInput.value.trim()) {
+                showNotification('Please enter a file prefix', 'error');
+                return;
+            }
+            
+            // Prepare form data
+            formData.append('file', fileInput.files[0]);
+            formData.append('column', columnInput.value.trim());
+            formData.append('excel_name', excelNameInput.value.trim());
+            
+            // Show loading
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('resultSection').style.display = 'none';
+            document.getElementById('submitBtn').disabled = true;
+            
+            try {
+                const response = await fetch('/split-excel/', {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]')?.value || ''
+                    }
+                });
+                
+                // Hide loading
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('submitBtn').disabled = false;
+                
+                if (response.ok) {
+                    // Check if response is a zip file
+                    const contentType = response.headers.get('content-type');
+                    if (contentType && contentType.includes('application/zip')) {
+                        // Handle zip file download
+                        const blob = await response.blob();
+                        const url = window.URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.style.display = 'none';
+                        a.href = url;
+                        
+                        // Get filename from Content-Disposition header
+                        const contentDisposition = response.headers.get('Content-Disposition');
+                        let filename = 'split_excel_files.zip';
+                        if (contentDisposition) {
+                            const filenameMatch = contentDisposition.match(/filename="(.+)"/);
+                            if (filenameMatch) {
+                                filename = filenameMatch[1];
+                            }
+                        }
+                        
+                        a.download = filename;
+                        document.body.appendChild(a);
+                        a.click();
+                        window.URL.revokeObjectURL(url);
+                        document.body.removeChild(a);
+                        
+                        // Show success message
+                        const resultSection = document.getElementById('resultSection');
+                        const resultContent = document.getElementById('resultContent');
+                        
+                        const fileCount = response.headers.get('X-File-Count') || '0';
+                        const fileNames = response.headers.get('X-File-Names');
+                        
+                        resultSection.className = 'result-section result-success';
+                        let html = `<h3><i class="fas fa-check-circle"></i> Excel files created and downloaded successfully!</h3>`;
+                        html += `<p><i class="fas fa-download"></i> Downloaded: <strong>${filename}</strong></p>`;
+                        html += `<p><i class="fas fa-file-alt"></i> Contains <strong>${fileCount}</strong> Excel files</p>`;
+                        
+                        if (fileNames) {
+                            const files = fileNames.split(',');
+                            html += '<div class="file-list"><h4><i class="fas fa-list"></i> Files in ZIP:</h4>';
+                            files.forEach(file => {
+                                html += `<div class="file-item"><i class="fas fa-file-excel"></i> ${file}</div>`;
+                            });
+                            html += '</div>';
+                        }
+                        
+                        resultContent.innerHTML = html;
+                        resultSection.style.display = 'block';
+                        
+                        // Show success notification
+                        showNotification('Files successfully processed and downloaded!', 'success');
+                        
+                    } else {
+                        // Handle JSON response (fallback)
+                        const result = await response.json();
+                        const resultSection = document.getElementById('resultSection');
+                        const resultContent = document.getElementById('resultContent');
+                        
+                        resultSection.className = 'result-section result-success';
+                        let html = `<h3><i class="fas fa-check-circle"></i> ${result.message}</h3>`;
+                        
+                        if (result.files && result.files.length > 0) {
+                            html += '<div class="file-list"><h4><i class="fas fa-list"></i> Created Files:</h4>';
+                            result.files.forEach(file => {
+                                html += `<div class="file-item"><i class="fas fa-file-excel"></i> ${file}</div>`;
+                            });
+                            html += '</div>';
+                        }
+                        
+                        resultContent.innerHTML = html;
+                        resultSection.style.display = 'block';
+                    }
+                } else {
+                    // Handle error response
+                    const result = await response.json();
+                    const resultSection = document.getElementById('resultSection');
+                    const resultContent = document.getElementById('resultContent');
+                    
+                    resultSection.className = 'result-section result-error';
+                    resultContent.innerHTML = `<h3><i class="fas fa-exclamation-circle"></i> Error</h3><p>${result.error || 'An unexpected error occurred'}</p>`;
+                    resultSection.style.display = 'block';
+                    
+                    showNotification(result.error || 'An unexpected error occurred', 'error');
+                }
+                
+            } catch (error) {
+                // Hide loading
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('submitBtn').disabled = false;
+                
+                // Show error
+                const resultSection = document.getElementById('resultSection');
+                const resultContent = document.getElementById('resultContent');
+                
+                resultSection.className = 'result-section result-error';
+                resultContent.innerHTML = `<h3><i class="fas fa-exclamation-triangle"></i> Network Error</h3><p>Failed to connect to the server. Please try again.</p>`;
+                resultSection.style.display = 'block';
+                
+                showNotification('Failed to connect to the server. Please try again.', 'error');
+            }
+        });
+
+        // Notification system
+        function showNotification(message, type = 'info') {
+            // Remove existing notifications
+            const existingNotification = document.querySelector('.notification');
+            if (existingNotification) {
+                existingNotification.remove();
+            }
+
+            const notification = document.createElement('div');
+            notification.className = `notification notification-${type}`;
+            notification.innerHTML = `
+                <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
+                <span>${message}</span>
+                <button onclick="this.parentElement.remove()" style="background: none; border: none; color: inherit; font-size: 1.2em; cursor: pointer; margin-left: auto;">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            
+            // Add notification styles
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: ${type === 'success' ? 'linear-gradient(135deg, #10B981, #059669)' : type === 'error' ? 'linear-gradient(135deg, #EF4444, #DC2626)' : 'linear-gradient(135deg, #3B82F6, #2563EB)'};
+                color: white;
+                padding: 16px 20px;
+                border-radius: 12px;
+                box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+                z-index: 10000;
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                max-width: 400px;
+                animation: slideInRight 0.3s ease;
+                font-family: 'Inter', sans-serif;
+                font-weight: 500;
+            `;
+
+            document.body.appendChild(notification);
+
+            // Auto-remove after 5 seconds
+            setTimeout(() => {
+                if (notification.parentElement) {
+                    notification.style.animation = 'slideOutRight 0.3s ease';
+                    setTimeout(() => notification.remove(), 300);
+                }
+            }, 5000);
+        }
+
+        // Add CSS animations for notifications
+        const notificationStyles = document.createElement('style');
+        notificationStyles.textContent = `
+            @keyframes slideInRight {
+                from {
+                    transform: translateX(100%);
+                    opacity: 0;
+                }
+                to {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+            }
+            
+            @keyframes slideOutRight {
+                from {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+                to {
+                    transform: translateX(100%);
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(notificationStyles);
+
+        // Add drag and drop functionality
+        const fileInputWrapper = document.querySelector('.file-input-wrapper');
+        
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            fileInputWrapper.addEventListener(eventName, preventDefaults, false);
+        });
+
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+            fileInputWrapper.addEventListener(eventName, highlight, false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            fileInputWrapper.addEventListener(eventName, unhighlight, false);
+        });
+
+        function highlight(e) {
+            fileInputWrapper.style.borderColor = 'var(--primary-color)';
+            fileInputWrapper.style.backgroundColor = 'rgba(79, 70, 229, 0.05)';
+        }
+
+        function unhighlight(e) {
+            fileInputWrapper.style.borderColor = 'var(--border-light)';
+            fileInputWrapper.style.backgroundColor = '';
+        }
+
+        fileInputWrapper.addEventListener('drop', handleDrop, false);
+
+        function handleDrop(e) {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            
+            if (files.length > 0) {
+                fileInput.files = files;
+                const event = new Event('change', { bubbles: true });
+                fileInput.dispatchEvent(event);
+            }
+        }
+    </script>
+</body>
+</html>
