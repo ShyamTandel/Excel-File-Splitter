@@ -2,3 +2,27 @@
 venv
 */venv
 *venv*/
+
+# Firebase files
+firebase-debug.log
+.firebase/
+
+# Django files
+*.log
+db.sqlite3
+db.sqlite3-journal
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environment variables
+.env
+.venv
+
+# IDE files
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
