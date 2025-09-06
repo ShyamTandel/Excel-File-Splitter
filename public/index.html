@@ -7,6 +7,10 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     
+    <!-- Excel Processing Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    
     <!-- Firebase SDKs -->
     <script defer src="/__/firebase/12.2.1/firebase-app-compat.js"></script>
     <script defer src="/__/firebase/12.2.1/firebase-analytics-compat.js"></script>
@@ -252,6 +256,65 @@
             line-height: 1.5;
         }
 
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        .form-group label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 12px;
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 1em;
+        }
+
+        .label-icon {
+            font-size: 1.2em;
+            color: var(--primary-color);
+        }
+        
+        .form-group input[type="file"],
+        .form-group input[type="text"],
+        .form-group select {
+            width: 100%;
+            padding: 16px 20px;
+            border: 2px solid var(--border-light);
+            border-radius: 12px;
+            font-size: 1em;
+            font-family: inherit;
+            transition: all 0.3s ease;
+            background: var(--surface);
+            color: var(--text-primary);
+        }
+
+        .form-group input[type="file"] {
+            cursor: pointer;
+            background: linear-gradient(135deg, #F9FAFB 0%, #F3F4F6 100%);
+        }
+        
+        .form-group input[type="file"]:focus,
+        .form-group input[type="text"]:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .form-group input::placeholder {
+            color: var(--text-secondary);
+        }
+
+        .form-group select {
+            cursor: pointer;
+        }
+
+        .form-group select option {
+            padding: 10px;
+        }
+
         /* Responsive Design */
         @media (max-width: 640px) {
             .container {
@@ -294,92 +357,416 @@
         </div>
         
         <div class="form-container">
-            <div class="demo-note">
-                <h3><i class="fas fa-info-circle"></i> Demo Version - Firebase Hosted</h3>
-                <p>This is a demo version hosted on Firebase. The full application with file processing capabilities is available on GitHub.</p>
-                <div class="tech-stack">
-                    <span class="tech-badge">Django</span>
-                    <span class="tech-badge">Python</span>
-                    <span class="tech-badge">Firebase</span>
-                    <span class="tech-badge">JavaScript</span>
-                </div>
-                <a href="https://github.com/ShyamTandel/Excel-File-Splitter" target="_blank" class="github-link">
-                    <i class="fab fa-github"></i> View Full Application on GitHub
-                </a>
+            <div class="info-box">
+                <strong><i class="fas fa-info-circle"></i> How it works:</strong>
+                Upload an Excel file and specify a column name. The tool will create separate Excel files for each unique value in that column and automatically download them as a ZIP file. <strong>All processing happens in your browser - no data is sent to any server!</strong>
             </div>
             
-            <div class="info-box">
-                <strong><i class="fas fa-cog"></i> How the Full Application Works:</strong>
-                Upload an Excel file and specify a column name. The Django backend creates separate Excel files for each unique value in that column and automatically downloads them as a ZIP file.
+            <form id="excelForm" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label for="file">
+                        <i class="fas fa-file-excel label-icon"></i>
+                        Select Excel File
+                    </label>
+                    <div class="file-input-wrapper">
+                        <input type="file" id="file" name="file" accept=".xlsx,.xls" required>
+                        <label for="file" class="file-input-label" id="fileLabel">
+                            <i class="fas fa-cloud-upload-alt upload-icon"></i>
+                            <span>Choose your Excel file or drag & drop here</span>
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="form-group" id="columnGroup" style="display: none;">
+                    <label for="column">
+                        <i class="fas fa-columns label-icon"></i>
+                        Column Name
+                    </label>
+                    <select id="column" name="column" required>
+                        <option value="">Select a column to split by</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="excel_name">
+                        <i class="fas fa-tag label-icon"></i>
+                        Output File Prefix
+                    </label>
+                    <input type="text" id="excel_name" name="excel_name" placeholder="Enter prefix for output files" required>
+                </div>
+                
+                <button type="submit" class="submit-btn" id="submitBtn">
+                    <i class="fas fa-magic"></i>
+                    Split Excel File
+                </button>
+            </form>
+            
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>Processing your file...</p>
             </div>
-
-            <div class="feature-grid">
-                <div class="feature-card">
-                    <h4><i class="fas fa-upload"></i> File Upload</h4>
-                    <p>Drag & drop Excel files (.xlsx, .xls) with intuitive file validation and preview.</p>
-                </div>
-
-                <div class="feature-card">
-                    <h4><i class="fas fa-columns"></i> Smart Splitting</h4>
-                    <p>Split files based on any column values with automatic data processing and validation.</p>
-                </div>
-
-                <div class="feature-card">
-                    <h4><i class="fas fa-download"></i> ZIP Download</h4>
-                    <p>Automatically download all split files packaged in a convenient ZIP archive.</p>
-                </div>
-
-                <div class="feature-card">
-                    <h4><i class="fas fa-mobile-alt"></i> Responsive Design</h4>
-                    <p>Beautiful, modern interface that works perfectly on all devices and screen sizes.</p>
-                </div>
-
-                <div class="feature-card">
-                    <h4><i class="fas fa-shield-alt"></i> Secure Processing</h4>
-                    <p>Files are processed securely on the server with no data retention or storage.</p>
-                </div>
-
-                <div class="feature-card">
-                    <h4><i class="fas fa-code"></i> Open Source</h4>
-                    <p>Full source code available on GitHub with detailed documentation and setup instructions.</p>
-                </div>
-            </div>
-
-            <div style="text-align: center; margin-top: 30px; padding: 20px; background: linear-gradient(135deg, #F3F4F6 0%, #E5E7EB 100%); border-radius: 16px;">
-                <h3 style="color: var(--text-primary); margin-bottom: 10px;">🚀 Ready to Use?</h3>
-                <p style="color: var(--text-secondary); margin-bottom: 15px;">Clone the repository and run locally for full functionality</p>
-                <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
-                    <a href="https://github.com/ShyamTandel/Excel-File-Splitter" target="_blank" style="background: var(--primary-color); color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; transition: all 0.3s ease;">
-                        <i class="fab fa-github"></i> GitHub Repository
-                    </a>
-                    <a href="https://github.com/ShyamTandel/Excel-File-Splitter/archive/refs/heads/main.zip" style="background: var(--success-color); color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; transition: all 0.3s ease;">
-                        <i class="fas fa-download"></i> Download Source
-                    </a>
-                </div>
+            
+            <div class="result-section" id="resultSection">
+                <div id="resultContent"></div>
             </div>
         </div>
     </div>
 
     <script>
-        // Initialize Firebase when it's loaded
-        document.addEventListener('DOMContentLoaded', function() {
-            // Firebase will be automatically initialized by the Firebase init script
-            console.log('Excel File Splitter Demo - Hosted on Firebase');
-            
-            // Add some interactive effects
-            const featureCards = document.querySelectorAll('.feature-card');
-            
-            featureCards.forEach(card => {
-                card.addEventListener('mouseenter', function() {
-                    this.style.transform = 'translateY(-5px) scale(1.02)';
-                });
-                
-                card.addEventListener('mouseleave', function() {
-                    this.style.transform = 'translateY(0) scale(1)';
-                });
-            });
+        let currentWorkbook = null;
+        let currentWorksheet = null;
 
-            // Animate elements on load
+        // File input enhancement
+        const fileInput = document.getElementById('file');
+        const fileLabel = document.getElementById('fileLabel');
+        const columnGroup = document.getElementById('columnGroup');
+        const columnSelect = document.getElementById('column');
+        
+        fileInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const validTypes = ['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'application/vnd.ms-excel'];
+                const isValidFile = validTypes.includes(file.type) || 
+                                  file.name.toLowerCase().endsWith('.xlsx') || 
+                                  file.name.toLowerCase().endsWith('.xls');
+                
+                if (!isValidFile) {
+                    showNotification('Please select a valid Excel file (.xlsx or .xls)', 'error');
+                    e.target.value = '';
+                    fileLabel.innerHTML = '<i class="fas fa-cloud-upload-alt upload-icon"></i><span>Choose your Excel file or drag & drop here</span>';
+                    fileLabel.classList.remove('has-file');
+                    columnGroup.style.display = 'none';
+                } else {
+                    fileLabel.innerHTML = `<i class="fas fa-file-excel upload-icon"></i><span>${file.name}</span>`;
+                    fileLabel.classList.add('has-file');
+                    processExcelFile(file);
+                }
+            }
+        });
+
+        // Process Excel file to extract column names
+        function processExcelFile(file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    currentWorkbook = XLSX.read(data, {type: 'array'});
+                    
+                    // Get the first worksheet
+                    const firstSheetName = currentWorkbook.SheetNames[0];
+                    currentWorksheet = currentWorkbook.Sheets[firstSheetName];
+                    
+                    // Convert to JSON to get headers
+                    const jsonData = XLSX.utils.sheet_to_json(currentWorksheet, {header: 1});
+                    
+                    if (jsonData.length > 0) {
+                        const headers = jsonData[0];
+                        populateColumnSelect(headers);
+                        columnGroup.style.display = 'block';
+                        showNotification('Excel file loaded successfully! Please select a column to split by.', 'success');
+                    } else {
+                        showNotification('The Excel file appears to be empty.', 'error');
+                    }
+                } catch (error) {
+                    showNotification('Error reading Excel file: ' + error.message, 'error');
+                    console.error('Excel processing error:', error);
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        // Populate column select dropdown
+        function populateColumnSelect(headers) {
+            columnSelect.innerHTML = '<option value="">Select a column to split by</option>';
+            headers.forEach((header, index) => {
+                if (header && header.toString().trim()) {
+                    const option = document.createElement('option');
+                    option.value = header;
+                    option.textContent = header;
+                    columnSelect.appendChild(option);
+                }
+            });
+        }
+
+        // Form submission with Excel processing
+        document.getElementById('excelForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const fileInput = document.getElementById('file');
+            const columnInput = document.getElementById('column');
+            const excelNameInput = document.getElementById('excel_name');
+            
+            // Validate inputs
+            if (!fileInput.files[0]) {
+                showNotification('Please select a file', 'error');
+                return;
+            }
+            
+            if (!columnInput.value.trim()) {
+                showNotification('Please select a column to split by', 'error');
+                return;
+            }
+            
+            if (!excelNameInput.value.trim()) {
+                showNotification('Please enter a file prefix', 'error');
+                return;
+            }
+
+            if (!currentWorkbook || !currentWorksheet) {
+                showNotification('Please wait for the file to be processed first', 'error');
+                return;
+            }
+            
+            // Show loading
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('resultSection').style.display = 'none';
+            document.getElementById('submitBtn').disabled = true;
+            
+            try {
+                await splitExcelFile(columnInput.value.trim(), excelNameInput.value.trim());
+            } catch (error) {
+                showNotification('Error processing file: ' + error.message, 'error');
+                console.error('Split error:', error);
+            } finally {
+                // Hide loading
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('submitBtn').disabled = false;
+            }
+        });
+
+        // Split Excel file function
+        async function splitExcelFile(columnName, filePrefix) {
+            try {
+                // Convert worksheet to JSON with headers
+                const jsonData = XLSX.utils.sheet_to_json(currentWorksheet);
+                
+                if (jsonData.length === 0) {
+                    throw new Error('No data found in the Excel file');
+                }
+
+                // Check if column exists
+                if (!jsonData[0].hasOwnProperty(columnName)) {
+                    throw new Error(`Column "${columnName}" not found in the Excel file`);
+                }
+
+                // Group data by unique values in the specified column
+                const groupedData = {};
+                jsonData.forEach(row => {
+                    const columnValue = row[columnName];
+                    if (columnValue !== undefined && columnValue !== null && columnValue !== '') {
+                        const key = columnValue.toString().trim();
+                        if (!groupedData[key]) {
+                            groupedData[key] = [];
+                        }
+                        groupedData[key].push(row);
+                    }
+                });
+
+                const uniqueValues = Object.keys(groupedData);
+                
+                if (uniqueValues.length === 0) {
+                    throw new Error(`No valid data found in column "${columnName}"`);
+                }
+
+                // Create ZIP file
+                const zip = new JSZip();
+                const createdFiles = [];
+
+                // Create Excel files for each unique value
+                for (const value of uniqueValues) {
+                    const rows = groupedData[value];
+                    
+                    // Create a new workbook
+                    const newWorkbook = XLSX.utils.book_new();
+                    const newWorksheet = XLSX.utils.json_to_sheet(rows);
+                    
+                    // Add the worksheet to workbook
+                    XLSX.utils.book_append_sheet(newWorkbook, newWorksheet, 'Sheet1');
+                    
+                    // Generate Excel file as array buffer
+                    const excelBuffer = XLSX.write(newWorkbook, {
+                        bookType: 'xlsx',
+                        type: 'array'
+                    });
+                    
+                    // Create filename (sanitize the value)
+                    const sanitizedValue = value.replace(/[<>:"/\\|?*]/g, '_');
+                    const fileName = `${sanitizedValue}_${filePrefix}.xlsx`;
+                    
+                    // Add to ZIP
+                    zip.file(fileName, excelBuffer);
+                    createdFiles.push(fileName);
+                }
+
+                // Generate ZIP file
+                const zipBlob = await zip.generateAsync({type: 'blob'});
+                
+                // Create download link
+                const url = window.URL.createObjectURL(zipBlob);
+                const a = document.createElement('a');
+                a.style.display = 'none';
+                a.href = url;
+                a.download = `split_excel_files_${filePrefix}.zip`;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+
+                // Show success message
+                showResults(createdFiles, filePrefix);
+                showNotification(`Successfully created ${createdFiles.length} Excel files!`, 'success');
+
+            } catch (error) {
+                throw error;
+            }
+        }
+
+        // Show results
+        function showResults(files, prefix) {
+            const resultSection = document.getElementById('resultSection');
+            const resultContent = document.getElementById('resultContent');
+            
+            resultSection.className = 'result-section result-success';
+            let html = `<h3><i class="fas fa-check-circle"></i> Excel files created and downloaded successfully!</h3>`;
+            html += `<p><i class="fas fa-download"></i> Downloaded: <strong>split_excel_files_${prefix}.zip</strong></p>`;
+            html += `<p><i class="fas fa-file-alt"></i> Contains <strong>${files.length}</strong> Excel files</p>`;
+            
+            if (files.length > 0) {
+                html += '<div class="file-list"><h4><i class="fas fa-list"></i> Files in ZIP:</h4>';
+                files.forEach(file => {
+                    html += `<div class="file-item"><i class="fas fa-file-excel"></i> ${file}</div>`;
+                });
+                html += '</div>';
+            }
+            
+            resultContent.innerHTML = html;
+            resultSection.style.display = 'block';
+        }
+
+        // Notification system
+        function showNotification(message, type = 'info') {
+            // Remove existing notifications
+            const existingNotification = document.querySelector('.notification');
+            if (existingNotification) {
+                existingNotification.remove();
+            }
+
+            const notification = document.createElement('div');
+            notification.className = `notification notification-${type}`;
+            notification.innerHTML = `
+                <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
+                <span>${message}</span>
+                <button onclick="this.parentElement.remove()" style="background: none; border: none; color: inherit; font-size: 1.2em; cursor: pointer; margin-left: auto;">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            
+            // Add notification styles
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: ${type === 'success' ? 'linear-gradient(135deg, #10B981, #059669)' : type === 'error' ? 'linear-gradient(135deg, #EF4444, #DC2626)' : 'linear-gradient(135deg, #3B82F6, #2563EB)'};
+                color: white;
+                padding: 16px 20px;
+                border-radius: 12px;
+                box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+                z-index: 10000;
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                max-width: 400px;
+                animation: slideInRight 0.3s ease;
+                font-family: 'Inter', sans-serif;
+                font-weight: 500;
+            `;
+
+            document.body.appendChild(notification);
+
+            // Auto-remove after 5 seconds
+            setTimeout(() => {
+                if (notification.parentElement) {
+                    notification.style.animation = 'slideOutRight 0.3s ease';
+                    setTimeout(() => notification.remove(), 300);
+                }
+            }, 5000);
+        }
+
+        // Add CSS animations for notifications
+        const notificationStyles = document.createElement('style');
+        notificationStyles.textContent = `
+            @keyframes slideInRight {
+                from {
+                    transform: translateX(100%);
+                    opacity: 0;
+                }
+                to {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+            }
+            
+            @keyframes slideOutRight {
+                from {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+                to {
+                    transform: translateX(100%);
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(notificationStyles);
+
+        // Add drag and drop functionality
+        const fileInputWrapper = document.querySelector('.file-input-wrapper');
+        
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            fileInputWrapper.addEventListener(eventName, preventDefaults, false);
+        });
+
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+            fileInputWrapper.addEventListener(eventName, highlight, false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            fileInputWrapper.addEventListener(eventName, unhighlight, false);
+        });
+
+        function highlight(e) {
+            fileInputWrapper.style.borderColor = 'var(--primary-color)';
+            fileInputWrapper.style.backgroundColor = 'rgba(79, 70, 229, 0.05)';
+        }
+
+        function unhighlight(e) {
+            fileInputWrapper.style.borderColor = 'var(--border-light)';
+            fileInputWrapper.style.backgroundColor = '';
+        }
+
+        fileInputWrapper.addEventListener('drop', handleDrop, false);
+
+        function handleDrop(e) {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            
+            if (files.length > 0) {
+                fileInput.files = files;
+                const event = new Event('change', { bubbles: true });
+                fileInput.dispatchEvent(event);
+            }
+        }
+
+        // Initialize Firebase and animate on load
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Excel File Splitter - Full Functionality Enabled');
+            
+            // Animate container on load
             const container = document.querySelector('.container');
             container.style.opacity = '0';
             container.style.transform = 'translateY(20px)';
@@ -389,6 +776,8 @@
                 container.style.opacity = '1';
                 container.style.transform = 'translateY(0)';
             }, 100);
+
+            showNotification('Excel File Splitter loaded successfully! All processing happens in your browser.', 'success');
         });
     </script>
 </body>
