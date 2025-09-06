@@ -576,6 +576,233 @@
             font-size: 1.5em;
         }
 
+        /* Loading Popup Modal Styles */
+        .loading-popup {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(8px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            animation: fadeInModal 0.3s ease;
+        }
+
+        .loading-popup.show {
+            display: flex;
+        }
+
+        .loading-modal {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.95) 100%);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            padding: 50px 40px;
+            text-align: center;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            max-width: 400px;
+            width: 90%;
+            position: relative;
+            animation: scaleInModal 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .loading-modal::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
+            border-radius: 24px;
+            padding: 2px;
+            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            mask-composite: exclude;
+            opacity: 0.3;
+        }
+
+        .loading-spinner-large {
+            width: 80px;
+            height: 80px;
+            border: 6px solid rgba(79, 70, 229, 0.15);
+            border-top: 6px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spinLarge 1.2s linear infinite;
+            margin: 0 auto 30px;
+            position: relative;
+        }
+
+        .loading-spinner-large::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(79, 70, 229, 0.2);
+            border-top: 3px solid var(--secondary-color);
+            border-radius: 50%;
+            animation: spinLarge 0.8s linear infinite reverse;
+            transform: translate(-50%, -50%);
+        }
+
+        .loading-modal h3 {
+            color: var(--primary-color);
+            font-size: 1.8em;
+            font-weight: 700;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .loading-modal p {
+            color: var(--text-secondary);
+            font-size: 1.1em;
+            font-weight: 500;
+            margin-bottom: 25px;
+            animation: pulseText 2s ease-in-out infinite;
+        }
+
+        .loading-progress {
+            width: 100%;
+            height: 6px;
+            background: rgba(79, 70, 229, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .loading-progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary-color), var(--primary-light), var(--secondary-color));
+            border-radius: 10px;
+            width: 0%;
+            animation: progressAnimation 3s ease-in-out infinite;
+        }
+
+        .loading-steps {
+            text-align: left;
+            background: rgba(79, 70, 229, 0.05);
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .loading-step {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+            font-size: 0.95em;
+            color: var(--text-secondary);
+            opacity: 0.6;
+            transition: all 0.3s ease;
+        }
+
+        .loading-step:last-child {
+            margin-bottom: 0;
+        }
+
+        .loading-step.active {
+            opacity: 1;
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+
+        .loading-step.completed {
+            opacity: 1;
+            color: var(--success-color);
+        }
+
+        .step-icon {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: rgba(79, 70, 229, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8em;
+            flex-shrink: 0;
+        }
+
+        .step-icon.active {
+            background: var(--primary-color);
+            color: white;
+            animation: pulseIcon 1.5s ease-in-out infinite;
+        }
+
+        .step-icon.completed {
+            background: var(--success-color);
+            color: white;
+        }
+
+        @keyframes fadeInModal {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes scaleInModal {
+            from {
+                opacity: 0;
+                transform: scale(0.7) translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        @keyframes spinLarge {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes pulseText {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.7;
+            }
+        }
+
+        @keyframes progressAnimation {
+            0% {
+                width: 0%;
+                background: linear-gradient(90deg, var(--primary-color), var(--primary-light));
+            }
+            50% {
+                width: 70%;
+                background: linear-gradient(90deg, var(--primary-light), var(--secondary-color));
+            }
+            100% {
+                width: 100%;
+                background: linear-gradient(90deg, var(--secondary-color), var(--success-color));
+            }
+        }
+
+        @keyframes pulseIcon {
+            0%, 100% {
+                transform: scale(1);
+                box-shadow: 0 0 0 0 rgba(79, 70, 229, 0.7);
+            }
+            50% {
+                transform: scale(1.1);
+                box-shadow: 0 0 0 10px rgba(79, 70, 229, 0);
+            }
+        }
+
         /* Responsive Design */
         @media (max-width: 640px) {
             .container {
@@ -669,6 +896,41 @@
             
             <div class="result-section" id="resultSection">
                 <div id="resultContent"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Popup Modal -->
+    <div class="loading-popup" id="loadingPopup">
+        <div class="loading-modal">
+            <div class="loading-spinner-large"></div>
+            <h3>
+                <i class="fas fa-magic"></i>
+                Processing Excel File
+            </h3>
+            <p>Please wait while we split your Excel file...</p>
+            
+            <div class="loading-progress">
+                <div class="loading-progress-bar"></div>
+            </div>
+            
+            <div class="loading-steps">
+                <div class="loading-step" id="step1">
+                    <div class="step-icon">1</div>
+                    <span>Reading Excel file structure</span>
+                </div>
+                <div class="loading-step" id="step2">
+                    <div class="step-icon">2</div>
+                    <span>Analyzing column data</span>
+                </div>
+                <div class="loading-step" id="step3">
+                    <div class="step-icon">3</div>
+                    <span>Creating separate files</span>
+                </div>
+                <div class="loading-step" id="step4">
+                    <div class="step-icon">4</div>
+                    <span>Generating ZIP archive</span>
+                </div>
             </div>
         </div>
     </div>
@@ -778,9 +1040,8 @@
                 return;
             }
             
-            // Show loading
-            document.getElementById('loading').style.display = 'block';
-            document.getElementById('loading').classList.add('show');
+            // Show loading popup
+            showLoadingPopup();
             document.getElementById('resultSection').style.display = 'none';
             document.getElementById('submitBtn').disabled = true;
             
@@ -790,9 +1051,8 @@
                 showNotification('Error processing file: ' + error.message, 'error');
                 console.error('Split error:', error);
             } finally {
-                // Hide loading
-                document.getElementById('loading').style.display = 'none';
-                document.getElementById('loading').classList.remove('show');
+                // Hide loading popup
+                hideLoadingPopup();
                 document.getElementById('submitBtn').disabled = false;
             }
         });
@@ -800,6 +1060,10 @@
         // Split Excel file function
         async function splitExcelFile(columnName, filePrefix) {
             try {
+                // Update step 1
+                updateLoadingStep(1, 'active');
+                await delay(800);
+
                 // Convert worksheet to JSON with headers
                 const jsonData = XLSX.utils.sheet_to_json(currentWorksheet);
                 
@@ -811,6 +1075,11 @@
                 if (!jsonData[0].hasOwnProperty(columnName)) {
                     throw new Error(`Column "${columnName}" not found in the Excel file`);
                 }
+
+                // Complete step 1, start step 2
+                updateLoadingStep(1, 'completed');
+                updateLoadingStep(2, 'active');
+                await delay(600);
 
                 // Group data by unique values in the specified column
                 const groupedData = {};
@@ -830,6 +1099,11 @@
                 if (uniqueValues.length === 0) {
                     throw new Error(`No valid data found in column "${columnName}"`);
                 }
+
+                // Complete step 2, start step 3
+                updateLoadingStep(2, 'completed');
+                updateLoadingStep(3, 'active');
+                await delay(400);
 
                 // Create ZIP file
                 const zip = new JSZip();
@@ -861,6 +1135,11 @@
                     createdFiles.push(fileName);
                 }
 
+                // Complete step 3, start step 4
+                updateLoadingStep(3, 'completed');
+                updateLoadingStep(4, 'active');
+                await delay(800);
+
                 // Generate ZIP file
                 const zipBlob = await zip.generateAsync({type: 'blob'});
                 
@@ -875,6 +1154,10 @@
                 window.URL.revokeObjectURL(url);
                 document.body.removeChild(a);
 
+                // Complete step 4
+                updateLoadingStep(4, 'completed');
+                await delay(500);
+
                 // Show success message
                 showResults(createdFiles, filePrefix);
                 showNotification(`Successfully created ${createdFiles.length} Excel files!`, 'success');
@@ -882,6 +1165,47 @@
             } catch (error) {
                 throw error;
             }
+        }
+
+        // Loading popup functions
+        function showLoadingPopup() {
+            const popup = document.getElementById('loadingPopup');
+            popup.classList.add('show');
+            
+            // Reset all steps
+            for (let i = 1; i <= 4; i++) {
+                updateLoadingStep(i, 'pending');
+            }
+        }
+
+        function hideLoadingPopup() {
+            const popup = document.getElementById('loadingPopup');
+            popup.classList.remove('show');
+        }
+
+        function updateLoadingStep(stepNumber, status) {
+            const step = document.getElementById(`step${stepNumber}`);
+            const icon = step.querySelector('.step-icon');
+            
+            // Remove all status classes
+            step.classList.remove('active', 'completed');
+            icon.classList.remove('active', 'completed');
+            
+            if (status === 'active') {
+                step.classList.add('active');
+                icon.classList.add('active');
+            } else if (status === 'completed') {
+                step.classList.add('completed');
+                icon.classList.add('completed');
+                icon.innerHTML = '<i class="fas fa-check"></i>';
+            } else if (status === 'pending') {
+                icon.innerHTML = stepNumber;
+            }
+        }
+
+        // Utility function for delays
+        function delay(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
         }
 
         // Show results
