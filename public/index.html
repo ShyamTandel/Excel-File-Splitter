@@ -418,6 +418,164 @@
             box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.3), 0 6px 20px rgba(79, 70, 229, 0.3);
         }
 
+        /* Loading Styles */
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 40px 20px;
+            background: linear-gradient(135deg, rgba(79, 70, 229, 0.05) 0%, rgba(99, 102, 241, 0.05) 100%);
+            border-radius: 16px;
+            margin-top: 20px;
+            border: 2px solid rgba(79, 70, 229, 0.1);
+        }
+
+        .loading.show {
+            display: block;
+            animation: fadeInUp 0.4s ease;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(79, 70, 229, 0.2);
+            border-top: 4px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        .loading p {
+            color: var(--primary-color);
+            font-size: 1.1em;
+            font-weight: 600;
+            margin: 0;
+            animation: pulse 1.5s ease-in-out infinite alternate;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Result Section Styles */
+        .result-section {
+            display: none;
+            margin-top: 20px;
+            padding: 30px;
+            border-radius: 16px;
+            animation: fadeInUp 0.5s ease;
+        }
+
+        .result-section.result-success {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(5, 150, 105, 0.1) 100%);
+            border: 2px solid rgba(16, 185, 129, 0.2);
+            color: var(--success-color);
+        }
+
+        .result-section h3 {
+            margin-bottom: 15px;
+            font-size: 1.3em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .result-section p {
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .file-list {
+            margin-top: 20px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 12px;
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+
+        .file-list h4 {
+            margin-bottom: 15px;
+            color: var(--success-color);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .file-item {
+            padding: 8px 12px;
+            background: rgba(16, 185, 129, 0.1);
+            border-radius: 8px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 500;
+        }
+
+        .file-item:last-child {
+            margin-bottom: 0;
+        }
+
+        /* File Input Wrapper Styles */
+        .file-input-wrapper {
+            position: relative;
+        }
+
+        .file-input-wrapper input[type="file"] {
+            position: absolute;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+            z-index: 2;
+        }
+
+        .file-input-label {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            padding: 20px;
+            border: 2px dashed var(--border-light);
+            border-radius: 12px;
+            background: linear-gradient(135deg, #F9FAFB 0%, #F3F4F6 100%);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            color: var(--text-secondary);
+            text-align: center;
+        }
+
+        .file-input-label:hover {
+            border-color: var(--primary-color);
+            background: linear-gradient(135deg, rgba(79, 70, 229, 0.05) 0%, rgba(99, 102, 241, 0.05) 100%);
+            color: var(--primary-color);
+            transform: translateY(-2px);
+        }
+
+        .file-input-label.has-file {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(5, 150, 105, 0.1) 100%);
+            border-color: var(--success-color);
+            color: var(--success-color);
+        }
+
+        .upload-icon {
+            font-size: 1.5em;
+        }
+
         /* Responsive Design */
         @media (max-width: 640px) {
             .container {
@@ -503,6 +661,11 @@
                     Split Excel File
                 </button>
             </form>
+            
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>Processing your file...</p>
+            </div>
             
             <div class="result-section" id="resultSection">
                 <div id="resultContent"></div>
@@ -617,6 +780,7 @@
             
             // Show loading
             document.getElementById('loading').style.display = 'block';
+            document.getElementById('loading').classList.add('show');
             document.getElementById('resultSection').style.display = 'none';
             document.getElementById('submitBtn').disabled = true;
             
@@ -628,6 +792,7 @@
             } finally {
                 // Hide loading
                 document.getElementById('loading').style.display = 'none';
+                document.getElementById('loading').classList.remove('show');
                 document.getElementById('submitBtn').disabled = false;
             }
         });
